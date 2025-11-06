@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Главная</a></li>
+                <li class="breadcrumb-item active">{{ athlete.full_name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ athlete.full_name }}</h2>
+            <a href="{{ url_for('generate_report', athlete_id=athlete.id) }}" class="btn btn-success">
+                📊 Скачать PDF отчет
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Персональные данные -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Персональные данные</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Дата рождения:</strong> {{ athlete.birth_date }} ({{ athlete.age }} лет)</p>
+                <p><strong>Пол:</strong> {{ athlete.gender }}</p>
+                <p><strong>Вид спорта:</strong> {{ athlete.sport }}</p>
+                <p><strong>Регион:</strong> {{ athlete.region }}</p>
+                <p><strong>Тренер:</strong> {{ athlete.coach }}</p>
+                <p><strong>Телефон:</strong> {{ athlete.contact_phone }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Физические показатели -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Физические показатели</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>МПК (VO2max):</strong> 
+                            <span class="badge {% if athlete.physical_data.vo2max > 65 %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ athlete.physical_data.vo2max }} мл/кг/мин
+                            </span>
+                        </p>
+                        <p><strong>Максимальная сила:</strong> {{ athlete.physical_data.max_strength }} кг</p>
+                        <p><strong>Безжировая масса тела:</strong> {{ athlete.physical_data.lean_body_mass }} кг</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>ПАНО:</strong> {{ athlete.physical_data.anaerobic_threshold }} ммоль/л</p>
+                        <p><strong>ЧСС в покое:</strong> {{ athlete.physical_data.resting_hr }} уд/мин</p>
+                        <p><strong>Максимальная ЧСС:</strong> {{ athlete.physical_data.max_hr }} уд/мин</p>
+                        <p><strong>Ударный объем сердца:</strong> {{ athlete.physical_data.stroke_volume }} мл</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Медицинские данные -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Медицинские данные</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Группа крови:</strong> {{ athlete.medical_data.blood_type }}</p>
+                <p><strong>Последний медосмотр:</strong> {{ athlete.medical_data.last_medical_check }}</p>
+                <p><strong>Травмы:</strong> {{ athlete.medical_data.injuries }}</p>
+                <p><strong>Рекомендации:</strong> {{ athlete.medical_data.recommendations }}</p>
+                <p><strong>Примечания врача:</strong> {{ athlete.medical_data.doctor_notes }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Психологические оценки -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Психологические оценки</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Мотивация:</strong> 
+                    {% for i in range(10) %}
+                        <span class="text-{% if i < athlete.psychological_data.motivation %}warning{% else %}muted{% endif %}">★</span>
+                    {% endfor %}
+                    ({{ athlete.psychological_data.motivation }}/10)
+                </p>
+                <p><strong>Стрессоустойчивость:</strong> {{ athlete.psychological_data.stress_resistance }}/10</p>
+                <p><strong>Концентрация:</strong> {{ athlete.psychological_data.concentration }}/10</p>
+                <p><strong>Командная работа:</strong> {{ athlete.psychological_data.teamwork }}/10</p>
+                <p><strong>Дисциплина:</strong> {{ athlete.psychological_data.discipline }}/10</p>
+                <p><strong>Дата оценки:</strong> {{ athlete.psychological_data.assessment_date }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Результаты соревнований -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Результаты соревнований</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Соревнование</th>
+                                <th>Дисциплина</th>
+                                <th>Место</th>
+                                <th>Результат</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in athlete.competition_results %}
+                            <tr>
+                                <td>{{ result.date }}</td>
+                                <td>{{ result.competition }}</td>
+                                <td>{{ result.event }}</td>
+                                <td>
+                                    <span class="badge {% if result.place <= 3 %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ result.place }}
+                                    </span>
+                                </td>
+                                <td>{{ result.result }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
